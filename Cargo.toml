@@ -16,4 +16,17 @@ path = "src/aoc2024/day1_2.rs"
 name = "day2"
 path = "src/aoc2024/day2.rs"
 
+[[bin]]
+name = "day2_2"
+path = "src/aoc2024/day2_2.rs"
+
+[[bin]]
+name = "day3"
+path = "src/aoc2024/day3.rs"
+
+[[bin]]
+name = "day3_2"
+path = "src/aoc2024/day3_2.rs"
+
 [dependencies]
+regex = "1.11.1"
