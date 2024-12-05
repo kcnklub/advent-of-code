@@ -3,6 +3,8 @@ name = "advent-of-code"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+
 
 [[bin]]
 name = "day1"
@@ -27,6 +29,10 @@ path = "src/aoc2024/day3.rs"
 [[bin]]
 name = "day3_2"
 path = "src/aoc2024/day3_2.rs"
+
+[[bin]]
+name = "day5"
+path = "src/aoc2024/day5.rs"
 
 [dependencies]
 regex = "1.11.1"
