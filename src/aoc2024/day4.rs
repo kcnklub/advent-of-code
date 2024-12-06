@@ -114,7 +114,63 @@ impl Puzzle {
 
     /// this is going to be part 2 instead of creating a new file
     fn find_x_max(&mut self) -> i32 {
-        0
+        let mut o = 0;
+        for h in 0..self.h - 1 {
+            for w in 0..self.w - 1 {
+                if let TileValue::A = &self.tiles[h][w].v {
+                    println!("A: h:{h}, w:{w}");
+                    if self.search_back_slash(h, w) && self.search_forward_slash(h, w) {
+                        self.mark_x(h, w);
+                        o += 1;
+                    }
+                }
+            }
+        }
+        o
+    }
+
+    fn mark_x(&mut self, h: usize, w: usize) {
+        self.found(h, w);
+
+        self.found(h + 1, w + 1);
+        self.found(h - 1, w - 1);
+        self.found(h + 1, w - 1);
+        self.found(h - 1, w + 1);
+    }
+
+    /// / slash
+    fn search_forward_slash(&self, h: usize, w: usize) -> bool {
+        if h == 0 || w == 0 || h == self.h || w == self.w {
+            return false;
+        }
+        if let TileValue::M = self.tiles[h - 1][w + 1].v {
+            if let TileValue::S = self.tiles[h + 1][w - 1].v {
+                return true;
+            }
+        }
+        if let TileValue::S = self.tiles[h - 1][w + 1].v {
+            if let TileValue::M = self.tiles[h + 1][w - 1].v {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn search_back_slash(&self, h: usize, w: usize) -> bool {
+        if h == 0 || w == 0 || h == self.h || w == self.w {
+            return false;
+        }
+        if let TileValue::M = self.tiles[h - 1][w - 1].v {
+            if let TileValue::S = self.tiles[h + 1][w + 1].v {
+                return true;
+            }
+        }
+        if let TileValue::S = self.tiles[h - 1][w - 1].v {
+            if let TileValue::M = self.tiles[h + 1][w + 1].v {
+                return true;
+            }
+        }
+        false
     }
 
     fn found(&mut self, h: usize, w: usize) {
@@ -278,8 +334,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut puzzle = Puzzle::new(input);
     let output = puzzle.find_xmas();
-
     println!("output: {}", output);
+
+    let part2 = puzzle.find_x_max();
+    println!("part2: {}", part2);
 
     Ok(())
 }
@@ -332,6 +390,37 @@ MXMXAXMASX"#;
         //let output = puzzle.find_xmas();
 
         assert_eq!(18, output)
+    }
+
+    #[test]
+    fn test_2() {
+        let input = r#"
+.M.S......
+..A..MSMS.
+.M.S.MAA..
+..A.ASMSM.
+.M.S.M....
+..........
+S.S.S.S.S.
+.A.A.A.A..
+M.M.M.M.M.
+.........."#;
+
+        let mut puzzle = Puzzle::new(input.to_string());
+        let o = puzzle.find_x_max();
+
+        for row in puzzle.tiles {
+            for tile in row {
+                if tile.found {
+                    print!("{}", something(tile.v).as_str().red())
+                } else {
+                    print!("{}", something(tile.v))
+                }
+            }
+            print!("\n")
+        }
+
+        assert_eq!(9, o)
     }
 
     fn something(i: TileValue) -> String {
