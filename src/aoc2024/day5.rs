@@ -48,7 +48,6 @@ fn is_page_safe(rules: &[(i32, i32)], page: &[i32]) -> bool {
                 if l > r {
                     return false;
                 }
-                // can we reorder
             }
         }
     }
