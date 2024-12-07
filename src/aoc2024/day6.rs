@@ -7,7 +7,7 @@ enum MapTile {
     EMPTY,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
 enum Direction {
     UP = 0,
     DOWN = 1,
@@ -29,14 +29,15 @@ impl From<char> for MapTile {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Map {
-    starting_location: Option<(usize, usize)>,
+    starting_location: (usize, usize),
     player_location: Option<(usize, usize)>,
     h: usize,
     w: usize,
     tiles: Vec<Vec<MapTile>>,
     found_tiles: HashSet<(usize, usize)>,
+    found_turns: HashSet<(usize, usize, Direction)>,
 }
 
 impl Map {
@@ -57,13 +58,36 @@ impl Map {
         }
 
         Self {
-            starting_location: Some(player_location),
+            starting_location: player_location,
             player_location: Some(player_location),
             h: tiles.len(),
             w: tiles.get(0).unwrap().len(),
             tiles,
             found_tiles: HashSet::new(),
+            found_turns: HashSet::new(),
         }
+    }
+
+    fn find_cycles(input: String) -> i32 {
+        let initial_map = Self::new(input);
+        let mut map = initial_map.clone();
+        map.process_movement();
+
+        let mut o = 0;
+        let candidates = map.found_tiles.clone();
+        for c in candidates {
+            if c == map.starting_location {
+                continue;
+            }
+            // determine if adding a blocker to the map at this location will cause a cycle;
+
+            let mut new_map = initial_map.clone();
+            std::mem::swap(&mut MapTile::WALL, &mut new_map.tiles[c.0][c.1]);
+            if new_map.is_cyclic() {
+                o += 1;
+            }
+        }
+        o
     }
 
     fn process_movement(&mut self) -> usize {
@@ -152,7 +176,7 @@ impl Map {
         let mut current_pos = (h, w);
         loop {
             self.found_tiles.insert(current_pos);
-            if current_pos.1 == self.w {
+            if current_pos.1 == self.w - 1 {
                 self.player_location = None;
                 break;
             }
@@ -206,18 +230,37 @@ impl Map {
         }
     }
 
-    fn find_cycles(&self) -> i32 {
-        todo!()
+    fn is_cyclic(&mut self) -> bool {
+        loop {
+            match self.player_location {
+                Some((h, w)) => {
+                    let player = &self.tiles[h][w];
+                    if let MapTile::PLAYER(d) = player {
+                        if self.found_turns.contains(&(h, w, d.clone())) {
+                            return true;
+                        }
+                        self.found_turns.insert((h, w, d.clone()));
+                        match d {
+                            Direction::UP => self.move_up(h, w),
+                            Direction::DOWN => self.move_down(h, w),
+                            Direction::RIGHT => self.move_right(h, w),
+                            Direction::LEFT => self.move_left(h, w),
+                        }
+                    }
+                }
+                None => break,
+            }
+        }
+        false
     }
 }
 
 #[allow(dead_code)]
 fn main() -> Result<(), Box<dyn Error>> {
     let input = fs::read_to_string("./resources/aoc2024/inputs/day6.txt")?;
-    let mut map = Map::new(input);
-    let output = map.process_movement();
 
-    println!("output: {output}");
+    let output = Map::find_cycles(input);
+    println!("output2: {output}");
 
     Ok(())
 }
@@ -320,10 +363,7 @@ mod tests {
 
     #[test]
     fn find_cycles() {
-        let mut map = Map::new(INPUT.to_string());
-        map.process_movement();
-
-        let output = map.find_cycles();
-        assert_eq!(6, output);
+        let o = Map::find_cycles(INPUT.to_string());
+        assert_eq!(6, o)
     }
 }
