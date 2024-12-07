@@ -38,6 +38,14 @@ path = "src/aoc2024/day4.rs"
 name = "day5"
 path = "src/aoc2024/day5.rs"
 
+[[bin]]
+name = "day6"
+path = "src/aoc2024/day6.rs"
+
+[[bin]]
+name = "day7"
+path = "src/aoc2024/day7.rs"
+
 [dependencies]
 colored = "2.1.0"
 regex = "1.11.1"
