@@ -17,3 +17,5 @@ mod day5_2;
 mod day6;
 
 mod day7;
+
+mod day8;
